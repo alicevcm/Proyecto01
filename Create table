@@ -1,0 +1,109 @@
+-- Created by Alice Castellanos
+-- Tabla 1 : users
+CREATE TABLE users(
+	client_id INT NOT NULL,
+    name VARCHAR(30) NOT NULL,
+    last_name VARCHAR(30) NOT NULL,
+    mail VARCHAR(100) NULL,
+    password VARCHAR(20) NOT NULL,
+    PRIMARY KEY(client_id)
+);
+
+-- Table 2: status
+CREATE TABLE status(
+	status_id INT NOT NULL,
+    status_desc VARCHAR(20) NOT NULL,
+    PRIMARY KEY(status_id)
+);
+    
+-- Table 3: claims_type
+CREATE TABLE claims_type(
+	reason_id INT NOT NULL,
+    reason_desc VARCHAR(20) NOT NULL,
+    PRIMARY KEY(reason_id)
+);
+    
+-- TABLE 4: category
+CREATE TABLE category(
+	category VARCHAR(150) NOT NULL,
+    domain VARCHAR(150) NOT NULL,
+    PRIMARY KEY (domain)
+);
+
+
+-- TABLE 5: publication
+CREATE TABLE publications(
+	publication_id INT NOT NULL,
+    status_id INT NOT NULL,
+    domain VARCHAR(150) NOT NULL,
+    PRIMARY KEY(publication_id),
+    FOREIGN KEY(domain) REFERENCES category (domain),
+    FOREIGN KEY(status_id) REFERENCES status (status_id)
+);
+
+-- TABLA 6: SKU
+CREATE TABLE sku(
+	item_id VARCHAR(7) NOT NULL UNIQUE,
+    descriptions VARCHAR(200) NOT NULL,
+    price DECIMAL(8,2) NOT NULL,
+    publication_id INT NOT NULL,
+    PRIMARY KEY(item_id),
+    FOREIGN KEY(publication_id) REFERENCES publications (publication_id)
+);
+
+-- TABLA 7: sales
+CREATE TABLE sales(
+	order_id INT NOT NULL UNIQUE AUTO_INCREMENT,
+    buyer_id INT NOT NULL,
+    item_id VARCHAR(7) NOT NULL,
+    price DECIMAL(8,2) NOT NULL,
+    purchase_date DATE NOT NULL,
+    quantity INT NOT NULL,
+    sub_status VARCHAR(20) NOT NULL,
+    PRIMARY KEY (order_id),
+    FOREIGN KEY(buyer_id) REFERENCES users(client_id),
+    FOREIGN KEY (item_id) REFERENCES sku(item_id)
+);
+
+-- TABLA 8: DELIVERIES
+CREATE TABLE deliveries(
+	delivery_shp INT NOT NULL UNIQUE AUTO_INCREMENT,
+    order_id INT NOT NULL UNIQUE,
+    status_id INT NOT NULL,
+    carrier VARCHAR(20) NOT NULL,
+    PRIMARY KEY (delivery_shp),
+    FOREIGN KEY (order_id) REFERENCES sales(order_id),
+    FOREIGN KEY (status_id) REFERENCES status(status_id)
+);
+
+-- TABLA 9: PAYMENTS
+CREATE TABLE payments(
+	shp INT NOT NULL UNIQUE,
+    payment_status VARCHAR(20) NOT NULL,
+    type1 VARCHAR(20) NOT NULL,
+    payment_id INT NOT NULL,
+    PRIMARY KEY (payment_id),
+    FOREIGN KEY (shp) REFERENCES deliveries (delivery_shp)
+);
+
+-- TABLA 10: CLAIMS
+CREATE TABLE claims(
+	order_id INT NOT NULL UNIQUE,
+    claim_id INT NOT NULL UNIQUE,
+    status_id INT NOT NULL,
+    reason_id INT NOT NULL,
+    PRIMARY KEY (claim_id),
+    FOREIGN KEY(order_id) REFERENCES sales(order_id),
+    FOREIGN KEY(status_id) REFERENCES status(status_id),
+    FOREIGN KEY(reason_id) REFERENCES claims_type(reason_id)
+);
+
+-- TABLA 11: RETURN
+CREATE TABLE returns(
+	return_shp INT NOT NULL UNIQUE AUTO_INCREMENT,
+    order_id INT NOT NULL UNIQUE,
+    status_id INT NOT NULL,
+    PRIMARY KEY (return_shp),
+    FOREIGN KEY (order_id) REFERENCES sales(order_id),
+    FOREIGN KEY (status_id) REFERENCES status(status_id)
+);
